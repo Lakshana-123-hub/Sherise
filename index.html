@@ -1,174 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>SheRise - AI Business Assistant</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+            margin: 0;
+            padding: 0;
+        }
+        h1 { color: purple; margin-top: 30px; }
+        h3 { color: #444; }
+        .container {
+            background: white;
+            padding: 25px;
+            width: 400px;
+            margin: 30px auto;
+            border-radius: 12px;
+            box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+        }
+        input { padding: 10px; width: 80%; border-radius: 6px; border: 1px solid #ccc; margin-top:5px;}
+        button {
+            padding: 10px 20px;
+            background-color: purple;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: darkviolet; }
+        #result { margin-top: 15px; font-weight: bold; color: #333; }
+        #weeklyTotal { margin-top: 5px; font-weight: bold; color: blue; }
+        label { font-weight: bold; }
+        .langSelect { margin-bottom: 20px; }
+        .toggleButtons button { margin:5px; }
+    </style>
 </head>
 <body>
 
 <h1>SheRise</h1>
 <h3 id="subheading">AI Business Insight Assistant</h3>
 
-<!-- Language Selection -->
 <div class="container">
-    <h2>Select Language / மொழியை தேர்ந்தெடுக்கவும்</h2>
-    <select id="lang">
-        <option value="en">English</option>
-        <option value="ta">தமிழ்</option>
-    </select>
+    <div class="langSelect">
+        <label>Select Language:</label>
+        <select id="langSelect" onchange="updateLanguage()">
+            <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+        </select>
+    </div>
+
+    <!-- Toggle Buttons -->
+    <div class="toggleButtons">
+        <button onclick="showDaily()">Daily Sales</button>
+        <button onclick="showWeekly()">Weekly Sales</button>
+    </div>
+
+    <!-- Daily Sales Container -->
+    <div id="dailyContainer">
+        <h3 id="dailyLabel">Enter Today's Sales:</h3>
+        <input type="number" id="dailySales" placeholder="Enter today's sales">
+    </div>
+
+    <!-- Weekly Sales Container -->
+    <div id="weeklyContainer" style="display:none;">
+        <h3 id="weeklyLabel">Enter Weekly Sales:</h3>
+        <input type="number" id="day0" placeholder="Monday"><br>
+        <input type="number" id="day1" placeholder="Tuesday"><br>
+        <input type="number" id="day2" placeholder="Wednesday"><br>
+        <input type="number" id="day3" placeholder="Thursday"><br>
+        <input type="number" id="day4" placeholder="Friday"><br>
+        <input type="number" id="day5" placeholder="Saturday"><br>
+        <input type="number" id="day6" placeholder="Sunday"><br>
+        <p id="weeklyTotal"></p>
+    </div>
+
+    <button onclick="generateInsight()" id="generateBtn" style="margin-top:10px;">Generate AI Insight</button>
 </div>
 
-<!-- Select Input Type -->
-<div class="container">
-    <h2 id="inputTypeLabel">Select Sales Input Type</h2>
-    <input type="radio" name="salesType" id="dailyRadio" checked> <span id="dailyLabel">Daily Sales</span><br>
-    <input type="radio" name="salesType" id="weeklyRadio"> <span id="weeklyLabel">Weekly Sales</span>
-</div>
-
-<!-- Daily Sales -->
-<div class="container" id="dailyContainer">
-    <label id="dailyInputLabel" for="dailySales">Enter Today's Sales:</label><br>
-    <input type="number" id="dailySales" placeholder="Enter today's sales">
-</div>
-
-<!-- Weekly Sales -->
-<div class="container" id="weeklyContainer" style="display:none;">
-    <label id="weeklyInputLabel">Enter Weekly Sales:</label><br>
-    <input type="number" id="mon" placeholder="திங்கள்">
-    <input type="number" id="tue" placeholder="செவ்வாய்">
-    <input type="number" id="wed" placeholder="புதன்">
-    <input type="number" id="thu" placeholder="வியாழன்">
-    <input type="number" id="fri" placeholder="வெள்ளி">
-    <input type="number" id="sat" placeholder="சனி">
-    <input type="number" id="sun" placeholder="ஞாயிறு">
-</div>
-
-<br>
-<button id="generateBtn">Generate AI Insight</button>
-
-<!-- Result Section -->
 <div class="container">
     <h2 id="resultHeading">AI Insight</h2>
     <p id="result">Your insight will appear here.</p>
 </div>
 
 <script>
-    // Language labels
-    var labels = {
-        en: {
-            subheading: "AI Business Insight Assistant",
-            inputType: "Select Sales Input Type",
-            dailyRadio: "Daily Sales",
-            weeklyRadio: "Weekly Sales",
-            dailyInput: "Enter Today's Sales:",
-            weeklyInput: "Enter Weekly Sales:",
-            weeklyPlaceholders: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
-            generateBtn: "Generate AI Insight",
-            resultHeading: "AI Insight"
-        },
-        ta: {
-            subheading: "AI வணிக கருத்து உதவியாளர்",
-            inputType: "விற்பனை தரவு வகை தேர்ந்தெடுக்கவும்",
-            dailyRadio: "தினசரி விற்பனை",
-            weeklyRadio: "வாராந்திர விற்பனை",
-            dailyInput: "இன்றைய விற்பனையை உள்ளிடவும்:",
-            weeklyInput: "வாராந்திர விற்பனையை உள்ளிடவும்",
-            weeklyPlaceholders: ["திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி","ஞாயிறு"],
-            generateBtn: "AI கருத்தை உருவாக்கவும்",
-            resultHeading: "AI கருத்து"
-        }
-    };
+function showDaily(){
+    document.getElementById("dailyContainer").style.display = "block";
+    document.getElementById("weeklyContainer").style.display = "none";
+    document.getElementById("weeklyTotal").innerText = "";
+}
 
-    // AI Insight messages (no 6PM, no average daily)
-    var insightText = {
-        en: {
-            excellent_daily: "Excellent performance! Expand your product range.",
-            good_daily: "Good sales. Promote best-selling products.",
-            moderate_daily: "Moderate sales. Consider marketing strategies.",
-            low_daily: "Low sales detected. Offer discounts to boost sales.",
-            excellent_weekly: "Excellent week! Consider scaling inventory.",
-            good_weekly: "Good week. Focus on top-selling products.",
-            moderate_weekly: "Moderate week. Consider marketing campaigns or promotions.",
-            low_weekly: "Low week sales. Review marketing and promotions."
-        },
-        ta: {
-            excellent_daily: "சிறந்த செயல்திறன்! உங்களுடைய தயாரிப்பு வரம்பை விரிவாக்குங்கள்.",
-            good_daily: "நல்ல விற்பனை. சிறந்த விற்பனை தயாரிப்புகளை விளம்பரம் செய்யுங்கள்.",
-            moderate_daily: "மிதமான விற்பனை. மார்க்கெட்டிங் வழிகளை பரிசீலிக்கவும்.",
-            low_daily: "குறைந்த விற்பனை கண்டறியப்பட்டது. விற்பனையை மேம்படுத்த தள்ளுபடிகளை வழங்கவும்.",
-            excellent_weekly: "சிறந்த வாரம்! சேமிப்பை விரிவாக்கத்தை பரிசீலிக்கவும்.",
-            good_weekly: "நல்ல வாரம். முக்கிய விற்பனை தயாரிப்புகளை கவனிக்கவும்.",
-            moderate_weekly: "மிதமான வாரம். மார்க்கெட்டிங் பிரச்சாரங்கள் அல்லது விளம்பரங்களை பரிசீலிக்கவும்.",
-            low_weekly: "குறைந்த வார விற்பனை. மார்க்கெட்டிங் மற்றும் விளம்பரங்களை மதிப்பீடு செய்யவும்."
-        }
-    };
+function showWeekly(){
+    document.getElementById("dailyContainer").style.display = "none";
+    document.getElementById("weeklyContainer").style.display = "block";
+}
 
-    // Update language dynamically
-    document.getElementById("lang").addEventListener("change", function(){
-        var lang = this.value;
-        document.getElementById("subheading").innerText = labels[lang].subheading;
-        document.getElementById("inputTypeLabel").innerText = labels[lang].inputType;
-        document.getElementById("dailyLabel").innerText = labels[lang].dailyRadio;
-        document.getElementById("weeklyLabel").innerText = labels[lang].weeklyRadio;
-        document.getElementById("dailyInputLabel").innerText = labels[lang].dailyInput;
-        document.getElementById("weeklyInputLabel").innerText = labels[lang].weeklyInput;
-        document.getElementById("generateBtn").innerText = labels[lang].generateBtn;
-        document.getElementById("resultHeading").innerText = labels[lang].resultHeading;
+function updateLanguage(){
+    var lang = document.getElementById("langSelect").value;
 
-        var days = ["mon","tue","wed","thu","fri","sat","sun"];
-        for(var i=0;i<days.length;i++){
-            document.getElementById(days[i]).placeholder = labels[lang].weeklyPlaceholders[i];
-        }
-    });
+    // Subheading
+    document.getElementById("subheading").innerText = (lang=="en")?"AI Business Insight Assistant":"AI வணிக கருத்து உதவியாளர்";
 
-    // Toggle daily/weekly input dynamically
-    document.getElementById("dailyRadio").addEventListener("change", function() {
-        document.getElementById("dailyContainer").style.display = "block";
-        document.getElementById("weeklyContainer").style.display = "none";
-    });
-    document.getElementById("weeklyRadio").addEventListener("change", function() {
-        document.getElementById("dailyContainer").style.display = "none";
-        document.getElementById("weeklyContainer").style.display = "block";
-    });
+    // Daily container
+    document.getElementById("dailyLabel").innerText = (lang=="en")?"Enter Today's Sales:":"இன்றைய விற்பனையை உள்ளிடவும்:";
 
-    // Generate AI Insight
-    document.getElementById("generateBtn").addEventListener("click", function(){
-        var result = document.getElementById("result");
-        var lang = document.getElementById("lang").value;
+    // Weekly container
+    document.getElementById("weeklyLabel").innerText = (lang=="en")?"Enter Weekly Sales:":"வாராந்திர விற்பனையை உள்ளிடவும்:";
 
-        if(document.getElementById("dailyRadio").checked){
-            var sales = Number(document.getElementById("dailySales").value);
-            if(isNaN(sales)) { result.innerHTML = (lang==="ta") ? "இன்றைய விற்பனையை உள்ளிடவும்" : "Enter today's sales"; return; }
-            result.innerHTML = getInsight(sales, "daily", lang);
-        }
-        else {
-            var days = ["mon","tue","wed","thu","fri","sat","sun"];
-            var salesArr = [];
-            for(var i=0; i<days.length; i++){
-                var val = Number(document.getElementById(days[i]).value);
-                if(isNaN(val)) { result.innerHTML = (lang==="ta") ? "அனைத்து 7 நாட்கள் விற்பனையை உள்ளிடவும்" : "Enter all 7 days sales"; return; }
-                salesArr.push(val);
-            }
-            var total = salesArr.reduce((a,b)=>a+b,0);
-            var insight = ((lang==="ta") ? "வாராந்திர மொத்தம்: " : "Weekly Total: ") + total + "<br>";
-            insight += getInsight(total, "weekly", lang);
-            result.innerHTML = insight;
-        }
-    });
+    // Weekly placeholders
+    var weeklyPlaceholders = (lang=="en")?
+        ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]:
+        ["திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி","ஞாயிறு"];
 
-    function getInsight(sales,type,lang){
-        if(type === "daily"){
-            if(sales > 7000) return insightText[lang].excellent_daily;
-            if(sales > 4000) return insightText[lang].good_daily;
-            if(sales > 2000) return insightText[lang].moderate_daily;
-            return insightText[lang].low_daily;
-        } else {
-            if(sales > 7000) return insightText[lang].excellent_weekly;
-            if(sales > 4000) return insightText[lang].good_weekly;
-            if(sales > 2000) return insightText[lang].moderate_weekly;
-            return insightText[lang].low_weekly;
-        }
+    for(var i=0;i<7;i++){
+        document.getElementById("day"+i).placeholder = weeklyPlaceholders[i];
     }
+
+    // Generate button
+    document.getElementById("generateBtn").innerText = (lang=="en")?"Generate AI Insight":"AI கருத்தை உருவாக்கவும்";
+
+    // Result heading
+    document.getElementById("resultHeading").innerText = (lang=="en")?"AI Insight":"AI கருத்து";
+}
+
+function generateInsight(){
+    var lang = document.getElementById("langSelect").value;
+    var result = document.getElementById("result");
+    var sales = 0;
+
+    if(document.getElementById("dailyContainer").style.display=="block"){
+        sales = document.getElementById("dailySales").value;
+        if(sales===""){ 
+            result.innerText = (lang=="en")?"Please enter sales amount.":"விற்பனை அளவை உள்ளிடவும்."; 
+            return; 
+        }
+        sales = Number(sales);
+        document.getElementById("weeklyTotal").innerText = "";
+    } else {
+        var weeklySales = [];
+        for(var i=0;i<7;i++){
+            var val = document.getElementById("day"+i).value;
+            if(val===""){ 
+                result.innerText = (lang=="en")?"Please enter all 7 days sales.":"எல்லா 7 நாட்களின் விற்பனையை உள்ளிடவும்."; 
+                return; 
+            }
+            weeklySales.push(Number(val));
+        }
+        sales = weeklySales.reduce((a,b)=>a+b,0);
+
+        // Show weekly total
+        document.getElementById("weeklyTotal").innerText = (lang=="en")?
+            "Total Weekly Sales: " + sales:
+            "மொத்த வாராந்திர விற்பனை: " + sales;
+    }
+
+    // AI Insight
+    if(sales > 7000){
+        result.innerText = (lang=="en")?"Excellent performance! Expand your product range.":"சிறந்த விற்பனை! உங்கள் பொருட்கள் வரம்பை விரிவாக்கவும்.";
+    }
+    else if(sales > 4000){
+        result.innerText = (lang=="en")?"Good sales. Promote best-selling products.":"நல்ல விற்பனை. சிறந்த விற்பனையுள்ள பொருட்களை விளம்பரம் செய்யவும்.";
+    }
+    else if(sales > 2000){
+        result.innerText = (lang=="en")?"Moderate sales. Try social media promotion.":"மதாரமான விற்பனை. சமூக ஊடக விளம்பரத்தை முயற்சிக்கவும்.";
+    }
+    else{
+        result.innerText = (lang=="en")?"Low sales detected. Offer discounts.":"குறைந்த விற்பனை கண்டறியப்பட்டது. தள்ளுபடிகள் வழங்கவும்.";
+    }
+}
+
+// Initialize
+updateLanguage();
 </script>
 
 </body>
