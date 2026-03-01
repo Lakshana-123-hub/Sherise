@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SheRise - AI Business Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>SheRise</h1>
+<h3 id="subheading">AI Business Insight Assistant</h3>
+
+<!-- Language Selection -->
+<div class="container">
+    <h2>Select Language / மொழியை தேர்ந்தெடுக்கவும்</h2>
+    <select id="lang">
+        <option value="en">English</option>
+        <option value="ta">தமிழ்</option>
+    </select>
+</div>
+
+<!-- Select Input Type -->
+<div class="container">
+    <h2 id="inputTypeLabel">Select Sales Input Type</h2>
+    <input type="radio" name="salesType" id="dailyRadio" checked> <span id="dailyLabel">Daily Sales</span><br>
+    <input type="radio" name="salesType" id="weeklyRadio"> <span id="weeklyLabel">Weekly Sales</span>
+</div>
+
+<!-- Daily Sales -->
+<div class="container" id="dailyContainer">
+    <label id="dailyInputLabel" for="dailySales">Enter Today's Sales:</label><br>
+    <input type="number" id="dailySales" placeholder="Enter today's sales">
+</div>
+
+<!-- Weekly Sales -->
+<div class="container" id="weeklyContainer" style="display:none;">
+    <label id="weeklyInputLabel">Enter Weekly Sales:</label><br>
+    <input type="number" id="mon" placeholder="திங்கள்">
+    <input type="number" id="tue" placeholder="செவ்வாய்">
+    <input type="number" id="wed" placeholder="புதன்">
+    <input type="number" id="thu" placeholder="வியாழன்">
+    <input type="number" id="fri" placeholder="வெள்ளி">
+    <input type="number" id="sat" placeholder="சனி">
+    <input type="number" id="sun" placeholder="ஞாயிறு">
+</div>
+
+<br>
+<button id="generateBtn">Generate AI Insight</button>
+
+<!-- Result Section -->
+<div class="container">
+    <h2 id="resultHeading">AI Insight</h2>
+    <p id="result">Your insight will appear here.</p>
+</div>
+
+<script>
+    // Language labels
+    var labels = {
+        en: {
+            subheading: "AI Business Insight Assistant",
+            inputType: "Select Sales Input Type",
+            dailyRadio: "Daily Sales",
+            weeklyRadio: "Weekly Sales",
+            dailyInput: "Enter Today's Sales:",
+            weeklyInput: "Enter Weekly Sales:",
+            weeklyPlaceholders: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            generateBtn: "Generate AI Insight",
+            resultHeading: "AI Insight"
+        },
+        ta: {
+            subheading: "AI வணிக கருத்து உதவியாளர்",
+            inputType: "விற்பனை தரவு வகை தேர்ந்தெடுக்கவும்",
+            dailyRadio: "தினசரி விற்பனை",
+            weeklyRadio: "வாராந்திர விற்பனை",
+            dailyInput: "இன்றைய விற்பனையை உள்ளிடவும்:",
+            weeklyInput: "வாராந்திர விற்பனையை உள்ளிடவும்",
+            weeklyPlaceholders: ["திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி","ஞாயிறு"],
+            generateBtn: "AI கருத்தை உருவாக்கவும்",
+            resultHeading: "AI கருத்து"
+        }
+    };
+
+    // AI Insight messages (no 6PM, no average daily)
+    var insightText = {
+        en: {
+            excellent_daily: "Excellent performance! Expand your product range.",
+            good_daily: "Good sales. Promote best-selling products.",
+            moderate_daily: "Moderate sales. Consider marketing strategies.",
+            low_daily: "Low sales detected. Offer discounts to boost sales.",
+            excellent_weekly: "Excellent week! Consider scaling inventory.",
+            good_weekly: "Good week. Focus on top-selling products.",
+            moderate_weekly: "Moderate week. Consider marketing campaigns or promotions.",
+            low_weekly: "Low week sales. Review marketing and promotions."
+        },
+        ta: {
+            excellent_daily: "சிறந்த செயல்திறன்! உங்களுடைய தயாரிப்பு வரம்பை விரிவாக்குங்கள்.",
+            good_daily: "நல்ல விற்பனை. சிறந்த விற்பனை தயாரிப்புகளை விளம்பரம் செய்யுங்கள்.",
+            moderate_daily: "மிதமான விற்பனை. மார்க்கெட்டிங் வழிகளை பரிசீலிக்கவும்.",
+            low_daily: "குறைந்த விற்பனை கண்டறியப்பட்டது. விற்பனையை மேம்படுத்த தள்ளுபடிகளை வழங்கவும்.",
+            excellent_weekly: "சிறந்த வாரம்! சேமிப்பை விரிவாக்கத்தை பரிசீலிக்கவும்.",
+            good_weekly: "நல்ல வாரம். முக்கிய விற்பனை தயாரிப்புகளை கவனிக்கவும்.",
+            moderate_weekly: "மிதமான வாரம். மார்க்கெட்டிங் பிரச்சாரங்கள் அல்லது விளம்பரங்களை பரிசீலிக்கவும்.",
+            low_weekly: "குறைந்த வார விற்பனை. மார்க்கெட்டிங் மற்றும் விளம்பரங்களை மதிப்பீடு செய்யவும்."
+        }
+    };
+
+    // Update language dynamically
+    document.getElementById("lang").addEventListener("change", function(){
+        var lang = this.value;
+        document.getElementById("subheading").innerText = labels[lang].subheading;
+        document.getElementById("inputTypeLabel").innerText = labels[lang].inputType;
+        document.getElementById("dailyLabel").innerText = labels[lang].dailyRadio;
+        document.getElementById("weeklyLabel").innerText = labels[lang].weeklyRadio;
+        document.getElementById("dailyInputLabel").innerText = labels[lang].dailyInput;
+        document.getElementById("weeklyInputLabel").innerText = labels[lang].weeklyInput;
+        document.getElementById("generateBtn").innerText = labels[lang].generateBtn;
+        document.getElementById("resultHeading").innerText = labels[lang].resultHeading;
+
+        var days = ["mon","tue","wed","thu","fri","sat","sun"];
+        for(var i=0;i<days.length;i++){
+            document.getElementById(days[i]).placeholder = labels[lang].weeklyPlaceholders[i];
+        }
+    });
+
+    // Toggle daily/weekly input dynamically
+    document.getElementById("dailyRadio").addEventListener("change", function() {
+        document.getElementById("dailyContainer").style.display = "block";
+        document.getElementById("weeklyContainer").style.display = "none";
+    });
+    document.getElementById("weeklyRadio").addEventListener("change", function() {
+        document.getElementById("dailyContainer").style.display = "none";
+        document.getElementById("weeklyContainer").style.display = "block";
+    });
+
+    // Generate AI Insight
+    document.getElementById("generateBtn").addEventListener("click", function(){
+        var result = document.getElementById("result");
+        var lang = document.getElementById("lang").value;
+
+        if(document.getElementById("dailyRadio").checked){
+            var sales = Number(document.getElementById("dailySales").value);
+            if(isNaN(sales)) { result.innerHTML = (lang==="ta") ? "இன்றைய விற்பனையை உள்ளிடவும்" : "Enter today's sales"; return; }
+            result.innerHTML = getInsight(sales, "daily", lang);
+        }
+        else {
+            var days = ["mon","tue","wed","thu","fri","sat","sun"];
+            var salesArr = [];
+            for(var i=0; i<days.length; i++){
+                var val = Number(document.getElementById(days[i]).value);
+                if(isNaN(val)) { result.innerHTML = (lang==="ta") ? "அனைத்து 7 நாட்கள் விற்பனையை உள்ளிடவும்" : "Enter all 7 days sales"; return; }
+                salesArr.push(val);
+            }
+            var total = salesArr.reduce((a,b)=>a+b,0);
+            var insight = ((lang==="ta") ? "வாராந்திர மொத்தம்: " : "Weekly Total: ") + total + "<br>";
+            insight += getInsight(total, "weekly", lang);
+            result.innerHTML = insight;
+        }
+    });
+
+    function getInsight(sales,type,lang){
+        if(type === "daily"){
+            if(sales > 7000) return insightText[lang].excellent_daily;
+            if(sales > 4000) return insightText[lang].good_daily;
+            if(sales > 2000) return insightText[lang].moderate_daily;
+            return insightText[lang].low_daily;
+        } else {
+            if(sales > 7000) return insightText[lang].excellent_weekly;
+            if(sales > 4000) return insightText[lang].good_weekly;
+            if(sales > 2000) return insightText[lang].moderate_weekly;
+            return insightText[lang].low_weekly;
+        }
+    }
+</script>
+
+</body>
+</html>
