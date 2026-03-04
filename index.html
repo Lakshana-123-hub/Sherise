@@ -1,180 +1,258 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>SheRise</title>
     <meta charset="UTF-8">
-    <title>SheRise - AI Business Assistant</title>
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background: linear-gradient(to right, #e0c3fc, #8ec5fc);
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #b39ddb, #90caf9);
+            text-align: center;
         }
-        h1 { color: purple; margin-top: 30px; }
-        h3 { color: #444; }
-        .container {
+
+        h1 {
+            color: purple;
+            margin-top: 30px;
+            font-size: 40px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
             background: white;
+            width: 500px;
+            margin: 20px auto;
             padding: 25px;
-            width: 400px;
-            margin: 30px auto;
-            border-radius: 12px;
-            box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
         }
-        input { padding: 10px; width: 80%; border-radius: 6px; border: 1px solid #ccc; margin-top:5px;}
+
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
         button {
             padding: 10px 20px;
-            background-color: purple;
-            color: white;
+            margin: 10px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
+            background: purple;
+            color: white;
             cursor: pointer;
-            margin-top: 10px;
         }
-        button:hover { background-color: darkviolet; }
-        #result { margin-top: 15px; font-weight: bold; color: #333; }
-        #weeklyTotal { margin-top: 5px; font-weight: bold; color: blue; }
-        label { font-weight: bold; }
-        .langSelect { margin-bottom: 20px; }
-        .toggleButtons button { margin:5px; }
+
+        button:hover {
+            background: darkmagenta;
+        }
+
+        .insight-card {
+            background: white;
+            width: 500px;
+            margin: 20px auto;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        #result {
+            white-space: pre-line;
+        }
     </style>
 </head>
+
 <body>
 
-<h1>SheRise</h1>
-<h3 id="subheading">AI Business Insight Assistant</h3>
-
-<div class="container">
-    <div class="langSelect">
-        <label>Select Language:</label>
-        <select id="langSelect" onchange="updateLanguage()">
-            <option value="en">English</option>
-            <option value="ta">தமிழ்</option>
-        </select>
-    </div>
-
-    <!-- Toggle Buttons -->
-    <div class="toggleButtons">
-        <button onclick="showDaily()">Daily Sales</button>
-        <button onclick="showWeekly()">Weekly Sales</button>
-    </div>
-
-    <!-- Daily Sales Container -->
-    <div id="dailyContainer">
-        <h3 id="dailyLabel">Enter Today's Sales:</h3>
-        <input type="number" id="dailySales" placeholder="Enter today's sales">
-    </div>
-
-    <!-- Weekly Sales Container -->
-    <div id="weeklyContainer" style="display:none;">
-        <h3 id="weeklyLabel">Enter Weekly Sales:</h3>
-        <input type="number" id="day0" placeholder="Monday"><br>
-        <input type="number" id="day1" placeholder="Tuesday"><br>
-        <input type="number" id="day2" placeholder="Wednesday"><br>
-        <input type="number" id="day3" placeholder="Thursday"><br>
-        <input type="number" id="day4" placeholder="Friday"><br>
-        <input type="number" id="day5" placeholder="Saturday"><br>
-        <input type="number" id="day6" placeholder="Sunday"><br>
-        <p id="weeklyTotal"></p>
-    </div>
-
-    <button onclick="generateInsight()" id="generateBtn" style="margin-top:10px;">Generate AI Insight</button>
+<h1 data-key="title">SheRise</h1>
+<div class="subtitle" data-key="subtitle">
+    AI Business Insight Assistant
 </div>
 
-<div class="container">
-    <h2 id="resultHeading">AI Insight</h2>
-    <p id="result">Your insight will appear here.</p>
+<div class="card">
+
+    <label data-key="selectLang">Select Language:</label>
+    <select onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="ta">தமிழ்</option>
+    </select>
+
+    <br><br>
+
+    <button data-key="dailyBtn" onclick="showDaily()">Daily Sales</button>
+    <button data-key="weeklyBtn" onclick="showWeekly()">Weekly Sales</button>
+
+    <h3 id="entryTitle">Enter Today's Sales:</h3>
+
+    <div id="inputArea">
+        <input type="number" id="dailyInput" placeholder="Enter today's sales">
+    </div>
+
+    <button data-key="generateBtn" onclick="generateInsight()">
+        Generate AI Insight
+    </button>
+
+</div>
+
+<div class="insight-card">
+    <h2 data-key="aiInsight">AI Insight</h2>
+    <p id="result">
+        Your insight will appear here.
+    </p>
 </div>
 
 <script>
-function showDaily(){
-    document.getElementById("dailyContainer").style.display = "block";
-    document.getElementById("weeklyContainer").style.display = "none";
-    document.getElementById("weeklyTotal").innerText = "";
-}
 
-function showWeekly(){
-    document.getElementById("dailyContainer").style.display = "none";
-    document.getElementById("weeklyContainer").style.display = "block";
-}
+let currentMode = "daily";
+let currentLang = "en";
 
-function updateLanguage(){
-    var lang = document.getElementById("langSelect").value;
+const translations = {
 
-    // Subheading
-    document.getElementById("subheading").innerText = (lang=="en")?"AI Business Insight Assistant":"AI வணிக கருத்து உதவியாளர்";
+    en: {
+        title: "SheRise",
+        subtitle: "AI Business Insight Assistant",
+        selectLang: "Select Language:",
+        dailyBtn: "Daily Sales",
+        weeklyBtn: "Weekly Sales",
+        enterToday: "Enter Today's Sales:",
+        enterWeekly: "Enter Weekly Sales:",
+        generateBtn: "Generate AI Insight",
+        aiInsight: "AI Insight",
+        placeholderToday: "Enter today's sales",
+        days: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+        total: "Total Weekly Sales",
+        average: "Average Per Day",
+        insight: "AI Insight",
+        low: "Low sales detected. Offer discounts.",
+        moderate: "Moderate sales. Try social media promotion.",
+        high: "Great sales performance. Maintain strategy."
+    },
 
-    // Daily container
-    document.getElementById("dailyLabel").innerText = (lang=="en")?"Enter Today's Sales:":"இன்றைய விற்பனையை உள்ளிடவும்:";
-
-    // Weekly container
-    document.getElementById("weeklyLabel").innerText = (lang=="en")?"Enter Weekly Sales:":"வாராந்திர விற்பனையை உள்ளிடவும்:";
-
-    // Weekly placeholders
-    var weeklyPlaceholders = (lang=="en")?
-        ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]:
-        ["திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி","ஞாயிறு"];
-
-    for(var i=0;i<7;i++){
-        document.getElementById("day"+i).placeholder = weeklyPlaceholders[i];
+    ta: {
+        title: "SheRise",
+        subtitle: "AI வணிக பகுப்பாய்வு உதவியாளர்",
+        selectLang: "மொழியை தேர்வு செய்க:",
+        dailyBtn: "தினசரி விற்பனை",
+        weeklyBtn: "வாராந்திர விற்பனை",
+        enterToday: "இன்றைய விற்பனையை உள்ளிடவும்:",
+        enterWeekly: "வாராந்திர விற்பனையை உள்ளிடவும்:",
+        generateBtn: "AI பகுப்பாய்வு உருவாக்கு",
+        aiInsight: "AI பகுப்பாய்வு",
+        placeholderToday: "இன்றைய விற்பனை உள்ளிடவும்",
+        days: ["திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி","ஞாயிறு"],
+        total: "மொத்த வார விற்பனை",
+        average: "ஒரு நாளின் சராசரி",
+        insight: "AI பகுப்பாய்வு",
+        low: "குறைந்த விற்பனை. தள்ளுபடி வழங்கவும்.",
+        moderate: "மிதமான விற்பனை. சமூக ஊடக விளம்பரம் செய்யவும்.",
+        high: "சிறந்த விற்பனை. தற்போதைய திட்டத்தை தொடரவும்."
     }
+};
 
-    // Generate button
-    document.getElementById("generateBtn").innerText = (lang=="en")?"Generate AI Insight":"AI கருத்தை உருவாக்கவும்";
+function changeLanguage(lang) {
+    currentLang = lang;
 
-    // Result heading
-    document.getElementById("resultHeading").innerText = (lang=="en")?"AI Insight":"AI கருத்து";
-}
+    document.querySelectorAll("[data-key]").forEach(el => {
+        const key = el.getAttribute("data-key");
+        el.innerText = translations[lang][key];
+    });
 
-function generateInsight(){
-    var lang = document.getElementById("langSelect").value;
-    var result = document.getElementById("result");
-    var sales = 0;
-
-    if(document.getElementById("dailyContainer").style.display=="block"){
-        sales = document.getElementById("dailySales").value;
-        if(sales===""){ 
-            result.innerText = (lang=="en")?"Please enter sales amount.":"விற்பனை அளவை உள்ளிடவும்."; 
-            return; 
-        }
-        sales = Number(sales);
-        document.getElementById("weeklyTotal").innerText = "";
+    if(currentMode === "daily") {
+        document.getElementById("dailyInput").placeholder =
+            translations[lang].placeholderToday;
+        document.getElementById("entryTitle").innerText =
+            translations[lang].enterToday;
     } else {
-        var weeklySales = [];
-        for(var i=0;i<7;i++){
-            var val = document.getElementById("day"+i).value;
-            if(val===""){ 
-                result.innerText = (lang=="en")?"Please enter all 7 days sales.":"எல்லா 7 நாட்களின் விற்பனையை உள்ளிடவும்."; 
-                return; 
-            }
-            weeklySales.push(Number(val));
-        }
-        sales = weeklySales.reduce((a,b)=>a+b,0);
-
-        // Show weekly total
-        document.getElementById("weeklyTotal").innerText = (lang=="en")?
-            "Total Weekly Sales: " + sales:
-            "மொத்த வாராந்திர விற்பனை: " + sales;
-    }
-
-    // AI Insight
-    if(sales > 7000){
-        result.innerText = (lang=="en")?"Excellent performance! Expand your product range.":"சிறந்த விற்பனை! உங்கள் பொருட்கள் வரம்பை விரிவாக்கவும்.";
-    }
-    else if(sales > 4000){
-        result.innerText = (lang=="en")?"Good sales. Promote best-selling products.":"நல்ல விற்பனை. சிறந்த விற்பனையுள்ள பொருட்களை விளம்பரம் செய்யவும்.";
-    }
-    else if(sales > 2000){
-        result.innerText = (lang=="en")?"Moderate sales. Try social media promotion.":"மதாரமான விற்பனை. சமூக ஊடக விளம்பரத்தை முயற்சிக்கவும்.";
-    }
-    else{
-        result.innerText = (lang=="en")?"Low sales detected. Offer discounts.":"குறைந்த விற்பனை கண்டறியப்பட்டது. தள்ளுபடிகள் வழங்கவும்.";
+        showWeekly();
     }
 }
 
-// Initialize
-updateLanguage();
+function showDaily() {
+
+    currentMode = "daily";
+
+    document.getElementById("entryTitle").innerText =
+        translations[currentLang].enterToday;
+
+    document.getElementById("inputArea").innerHTML =
+        `<input type="number" id="dailyInput"
+        placeholder="${translations[currentLang].placeholderToday}">`;
+}
+
+function showWeekly() {
+
+    currentMode = "weekly";
+
+    document.getElementById("entryTitle").innerText =
+        translations[currentLang].enterWeekly;
+
+    let inputs = "";
+
+    for(let i=0; i<7; i++){
+        inputs += `
+            <label>${translations[currentLang].days[i]}</label><br>
+            <input type="number" class="weekInput"><br><br>
+        `;
+    }
+
+    document.getElementById("inputArea").innerHTML = inputs;
+}
+
+function generateInsight() {
+
+    let resultText = "";
+
+    if(currentMode === "daily") {
+
+        let value = Number(document.getElementById("dailyInput").value);
+
+        let insightText =
+            value < 300 ? translations[currentLang].low :
+            value < 700 ? translations[currentLang].moderate :
+            translations[currentLang].high;
+
+        resultText = insightText;
+
+    } else {
+
+        let inputs = document.querySelectorAll(".weekInput");
+        let total = 0;
+
+        inputs.forEach(input => {
+            total += Number(input.value);
+        });
+
+        let average = Math.round(total / 7);
+
+        let insightText =
+            total < 2000 ? translations[currentLang].low :
+            total < 4000 ? translations[currentLang].moderate :
+            translations[currentLang].high;
+
+        resultText =
+            translations[currentLang].total + ": ₹" + total +
+            "\n" +
+            translations[currentLang].average + ": ₹" + average +
+            "\n\n" +
+            translations[currentLang].insight + ": " + insightText;
+    }
+
+    document.getElementById("result").innerText = resultText;
+}
+
 </script>
 
 </body>
 </html>
+   
